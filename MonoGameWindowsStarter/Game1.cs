@@ -112,7 +112,7 @@ namespace MonoGameWindowsStarter
             // Spawn fruit if it was collected
             if (fruitCollected)
             {
-
+                spawnFruit();
             }
 
             base.Update(gameTime);
@@ -129,7 +129,7 @@ namespace MonoGameWindowsStarter
             // TODO: Add your drawing code here
             spriteBatch.Begin();
             spriteBatch.Draw(monster, monsterRect, Color.White);
-            spriteBatch.Draw(fruit, new Rectangle(100, 100, 30, 30), Color.White);
+            spawnFruit();
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -138,9 +138,9 @@ namespace MonoGameWindowsStarter
         public void spawnFruit()
         {
             Random r = new Random();
-            int randomX;
-            int randomY;
-            //Draw
+            int randomX = r.Next(0, GraphicsDevice.Viewport.Width);
+            int randomY = r.Next(0, GraphicsDevice.Viewport.Height);
+            spriteBatch.Draw(fruit, new Rectangle(randomX, randomY, 30, 30), Color.White);
         }
     }
 }
