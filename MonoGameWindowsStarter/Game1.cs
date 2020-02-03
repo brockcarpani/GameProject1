@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace MonoGameWindowsStarter
 {
@@ -11,6 +12,12 @@ namespace MonoGameWindowsStarter
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        Texture2D monster;
+        KeyboardState keyboardState;
+        int monsterSpeed = 5;
+        Rectangle monsterRect;
+        Texture2D fruit;
+        bool fruitCollected = false;
 
         public Game1()
         {
@@ -28,6 +35,16 @@ namespace MonoGameWindowsStarter
         {
             // TODO: Add your initialization logic here
 
+            graphics.PreferredBackBufferWidth = 1042;
+            graphics.PreferredBackBufferHeight = 768;
+            graphics.ApplyChanges();
+
+            // Monster Rectangle init
+            monsterRect.X = 50;
+            monsterRect.Y = 50;
+            monsterRect.Width = 75;
+            monsterRect.Height = 75;
+
             base.Initialize();
         }
 
@@ -41,6 +58,8 @@ namespace MonoGameWindowsStarter
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
+            monster = Content.Load<Texture2D>("monster");
+            fruit = Content.Load<Texture2D>("fruit");
         }
 
         /// <summary>
@@ -62,7 +81,39 @@ namespace MonoGameWindowsStarter
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            keyboardState = Keyboard.GetState();
+
+            // Monster Movement
+            if (keyboardState.IsKeyDown(Keys.Down))
+            {
+                monsterRect.Y += monsterSpeed;
+            }
+            if (keyboardState.IsKeyDown(Keys.Up))
+            {
+                monsterRect.Y -= monsterSpeed;
+            }
+            if (keyboardState.IsKeyDown(Keys.Right))
+            {
+                monsterRect.X += monsterSpeed;
+            }
+            if (keyboardState.IsKeyDown(Keys.Left))
+            {
+                monsterRect.X -= monsterSpeed;
+            }
+
+            // Keep Monster on Screen
+            if (monsterRect.Y < 0) monsterRect.Y = 0;
+            if (monsterRect.Y > GraphicsDevice.Viewport.Height - monsterRect.Height) monsterRect.Y = GraphicsDevice.Viewport.Height - monsterRect.Height;
+            if (monsterRect.X < 0) monsterRect.X = 0;
+            if (monsterRect.X > GraphicsDevice.Viewport.Width - monsterRect.Width) monsterRect.X = GraphicsDevice.Viewport.Width - monsterRect.Width;
+
             // TODO: Add your update logic here
+
+            // Spawn fruit if it was collected
+            if (fruitCollected)
+            {
+
+            }
 
             base.Update(gameTime);
         }
@@ -73,11 +124,23 @@ namespace MonoGameWindowsStarter
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.White);
 
             // TODO: Add your drawing code here
+            spriteBatch.Begin();
+            spriteBatch.Draw(monster, monsterRect, Color.White);
+            spriteBatch.Draw(fruit, new Rectangle(100, 100, 30, 30), Color.White);
+            spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        public void spawnFruit()
+        {
+            Random r = new Random();
+            int randomX;
+            int randomY;
+            //Draw
         }
     }
 }
