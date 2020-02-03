@@ -17,7 +17,11 @@ namespace MonoGameWindowsStarter
         int monsterSpeed = 5;
         Rectangle monsterRect;
         Texture2D fruit;
-        bool fruitCollected = false;
+        Rectangle fruitRect;
+        bool fruitWasCollected = true;
+        int score = 0;
+        SpriteFont font;
+        SpriteEffects spriteEffects;
 
         public Game1()
         {
@@ -40,10 +44,16 @@ namespace MonoGameWindowsStarter
             graphics.ApplyChanges();
 
             // Monster Rectangle init
-            monsterRect.X = 50;
-            monsterRect.Y = 50;
+            monsterRect.X = 500;
+            monsterRect.Y = 200;
             monsterRect.Width = 75;
             monsterRect.Height = 75;
+
+            // Fruit Rect init
+            fruitRect.X = -30;
+            fruitRect.Y = -30;
+            fruitRect.Width = 30;
+            fruitRect.Height = 30;
 
             base.Initialize();
         }
@@ -60,6 +70,7 @@ namespace MonoGameWindowsStarter
             // TODO: use this.Content to load your game content here
             monster = Content.Load<Texture2D>("monster");
             fruit = Content.Load<Texture2D>("fruit");
+            font = Content.Load<SpriteFont>("font");
         }
 
         /// <summary>
@@ -95,10 +106,12 @@ namespace MonoGameWindowsStarter
             if (keyboardState.IsKeyDown(Keys.Right))
             {
                 monsterRect.X += monsterSpeed;
+                spriteEffects = SpriteEffects.None;
             }
             if (keyboardState.IsKeyDown(Keys.Left))
             {
                 monsterRect.X -= monsterSpeed;
+                spriteEffects = SpriteEffects.FlipHorizontally;
             }
 
             // Keep Monster on Screen
@@ -108,11 +121,15 @@ namespace MonoGameWindowsStarter
             if (monsterRect.X > GraphicsDevice.Viewport.Width - monsterRect.Width) monsterRect.X = GraphicsDevice.Viewport.Width - monsterRect.Width;
 
             // TODO: Add your update logic here
-
-            // Spawn fruit if it was collected
-            if (fruitCollected)
+            if (monsterCollectedFruit())
             {
-                spawnFruit();
+                fruitWasCollected = true;
+                score++;
+            }
+
+            if (fruitWasCollected)
+            {
+                changeFruitPosition();
             }
 
             base.Update(gameTime);
@@ -128,19 +145,29 @@ namespace MonoGameWindowsStarter
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            spriteBatch.Draw(monster, monsterRect, Color.White);
-            spawnFruit();
+            //spriteBatch.Draw(monster, monsterRect, Color.White);
+            spriteBatch.Draw(monster, monsterRect, null, Color.White, 0.0f, new Vector2(0, 0), spriteEffects, 0.0f);
+            spriteBatch.Draw(fruit, fruitRect, Color.White);
+            spriteBatch.DrawString(font, "Score: " + score.ToString(), new Vector2(0, 0), Color.Purple);
             spriteBatch.End();
 
             base.Draw(gameTime);
         }
 
-        public void spawnFruit()
+        public void changeFruitPosition()
         {
             Random r = new Random();
-            int randomX = r.Next(0, GraphicsDevice.Viewport.Width);
-            int randomY = r.Next(0, GraphicsDevice.Viewport.Height);
-            spriteBatch.Draw(fruit, new Rectangle(randomX, randomY, 30, 30), Color.White);
+            fruitRect.X = r.Next(0, GraphicsDevice.Viewport.Width - fruitRect.Width);
+            fruitRect.Y = r.Next(0, GraphicsDevice.Viewport.Height - fruitRect.Height);
+            fruitWasCollected = !fruitWasCollected;
+        }
+
+        public bool monsterCollectedFruit()
+        {
+            return (monsterRect.X < fruitRect.X + fruitRect.Width
+                && monsterRect.X + monsterRect.Width > fruitRect.X
+                && monsterRect.Y < fruitRect.Y + fruitRect.Height
+                && monsterRect.Y + monsterRect.Height > fruitRect.Y);
         }
     }
 }
