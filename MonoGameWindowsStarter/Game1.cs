@@ -137,6 +137,11 @@ namespace MonoGameWindowsStarter
             checkPixelBounds();
 
             // TODO: Add your update logic here
+            if (pixelHitMonster())
+            {
+                score -= 1;
+            }
+
             if (monsterCollectedFruit())
             {
                 fruitWasCollected = true;
@@ -183,6 +188,14 @@ namespace MonoGameWindowsStarter
                 && monsterRect.X + monsterRect.Width > fruitRect.X
                 && monsterRect.Y < fruitRect.Y + fruitRect.Height
                 && monsterRect.Y + monsterRect.Height > fruitRect.Y);
+        }
+
+        public bool pixelHitMonster()
+        {
+            return (pixelPosition.X < monsterRect.X + monsterRect.Width
+                && pixelPosition.X + 50 > monsterRect.X
+                && pixelPosition.Y < monsterRect.Y + monsterRect.Height
+                && pixelPosition.Y + 50 > monsterRect.Y);
         }
 
         public void checkPixelBounds()
