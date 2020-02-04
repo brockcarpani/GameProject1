@@ -22,6 +22,11 @@ namespace MonoGameWindowsStarter
         int score = 0;
         SpriteFont font;
         SpriteEffects spriteEffects;
+        Texture2D pixel;
+        Vector2 pixelPosition = Vector2.Zero;
+        Vector2 pixelVelocity;
+        Random r = new Random();
+
 
         public Game1()
         {
@@ -55,6 +60,13 @@ namespace MonoGameWindowsStarter
             fruitRect.Width = 30;
             fruitRect.Height = 30;
 
+            // Pixel Velocity init
+            pixelVelocity = new Vector2(
+            (float)r.NextDouble(),
+            (float)r.NextDouble()
+            );
+            pixelVelocity.Normalize();
+
             base.Initialize();
         }
 
@@ -71,6 +83,7 @@ namespace MonoGameWindowsStarter
             monster = Content.Load<Texture2D>("monster");
             fruit = Content.Load<Texture2D>("fruit");
             font = Content.Load<SpriteFont>("font");
+            pixel = Content.Load<Texture2D>("pixel");
         }
 
         /// <summary>
@@ -120,6 +133,9 @@ namespace MonoGameWindowsStarter
             if (monsterRect.X < 0) monsterRect.X = 0;
             if (monsterRect.X > GraphicsDevice.Viewport.Width - monsterRect.Width) monsterRect.X = GraphicsDevice.Viewport.Width - monsterRect.Width;
 
+            // Pixel Movement
+            checkPixelBounds();
+
             // TODO: Add your update logic here
             if (monsterCollectedFruit())
             {
@@ -145,10 +161,10 @@ namespace MonoGameWindowsStarter
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            //spriteBatch.Draw(monster, monsterRect, Color.White);
             spriteBatch.Draw(monster, monsterRect, null, Color.White, 0.0f, new Vector2(0, 0), spriteEffects, 0.0f);
             spriteBatch.Draw(fruit, fruitRect, Color.White);
             spriteBatch.DrawString(font, "Score: " + score.ToString(), new Vector2(0, 0), Color.Purple);
+            spriteBatch.Draw(pixel, new Rectangle((int)pixelPosition.X, (int)pixelPosition.Y, 50, 50), Color.Red);
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -156,7 +172,6 @@ namespace MonoGameWindowsStarter
 
         public void changeFruitPosition()
         {
-            Random r = new Random();
             fruitRect.X = r.Next(0, GraphicsDevice.Viewport.Width - fruitRect.Width);
             fruitRect.Y = r.Next(0, GraphicsDevice.Viewport.Height - fruitRect.Height);
             fruitWasCollected = !fruitWasCollected;
@@ -168,6 +183,40 @@ namespace MonoGameWindowsStarter
                 && monsterRect.X + monsterRect.Width > fruitRect.X
                 && monsterRect.Y < fruitRect.Y + fruitRect.Height
                 && monsterRect.Y + monsterRect.Height > fruitRect.Y);
+        }
+
+        public void checkPixelBounds()
+        {
+            pixelPosition += 5 * pixelVelocity;
+
+            // Check for wall collisions
+            if (pixelPosition.Y < 0)
+            {
+                pixelVelocity.Y *= -1;
+                float delta = 0 - pixelPosition.Y;
+                pixelPosition.Y += 2 * delta;
+            }
+
+            if (pixelPosition.Y > graphics.PreferredBackBufferHeight - 50)
+            {
+                pixelVelocity.Y *= -1;
+                float delta = graphics.PreferredBackBufferHeight - 50 - pixelPosition.Y;
+                pixelPosition.Y += 2 * delta;
+            }
+
+            if (pixelPosition.X < 0)
+            {
+                pixelVelocity.X *= -1;
+                float delta = 0 - pixelPosition.X;
+                pixelPosition.X += 2 * delta;
+            }
+
+            if (pixelPosition.X > graphics.PreferredBackBufferWidth - 50)
+            {
+                pixelVelocity.X *= -1;
+                float delta = graphics.PreferredBackBufferWidth - 50 - pixelPosition.X;
+                pixelPosition.X += 2 * delta;
+            }
         }
     }
 }
