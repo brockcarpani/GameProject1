@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using Microsoft.Xna.Framework.Audio;
 
 namespace MonoGameWindowsStarter
 {
@@ -26,6 +27,8 @@ namespace MonoGameWindowsStarter
         Vector2 pixelPosition = Vector2.Zero;
         Vector2 pixelVelocity;
         Random r = new Random();
+        SoundEffect eat;
+        SoundEffect fail;
 
 
         public Game1()
@@ -84,6 +87,8 @@ namespace MonoGameWindowsStarter
             fruit = Content.Load<Texture2D>("fruit");
             font = Content.Load<SpriteFont>("font");
             pixel = Content.Load<Texture2D>("pixel");
+            eat = Content.Load<SoundEffect>("eat");
+            fail = Content.Load<SoundEffect>("fail");
         }
 
         /// <summary>
@@ -140,10 +145,12 @@ namespace MonoGameWindowsStarter
             if (pixelHitMonster())
             {
                 score -= 1;
+                fail.Play();
             }
 
             if (monsterCollectedFruit())
             {
+                eat.Play();
                 fruitWasCollected = true;
                 score++;
             }
