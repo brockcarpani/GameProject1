@@ -29,6 +29,14 @@ namespace MonoGameWindowsStarter
         Random r = new Random();
         SoundEffect eat;
         SoundEffect fail;
+        Rectangle monsterSourceRect;
+        int frame;
+        TimeSpan timer;
+
+        /// <summary>
+        /// How quickly the animation should advance frames (1/8 second as milliseconds)
+        /// </summary>
+        const int ANIMATION_FRAME_RATE = 124;
 
 
         public Game1()
@@ -57,6 +65,12 @@ namespace MonoGameWindowsStarter
             monsterRect.Width = 75;
             monsterRect.Height = 75;
 
+            // Monster source rect init
+            monsterSourceRect.X = 0;
+            monsterSourceRect.Y = 0;
+            monsterSourceRect.Width = 50;
+            monsterSourceRect.Height = 50;
+
             // Fruit Rect init
             fruitRect.X = -30;
             fruitRect.Y = -30;
@@ -69,6 +83,8 @@ namespace MonoGameWindowsStarter
             (float)r.NextDouble()
             );
             pixelVelocity.Normalize();
+
+            timer = new TimeSpan(0);
 
             base.Initialize();
         }
@@ -83,7 +99,7 @@ namespace MonoGameWindowsStarter
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            monster = Content.Load<Texture2D>("monster");
+            monster = Content.Load<Texture2D>("mon_sprite");
             fruit = Content.Load<Texture2D>("fruit");
             font = Content.Load<SpriteFont>("font");
             pixel = Content.Load<Texture2D>("pixel");
@@ -144,7 +160,11 @@ namespace MonoGameWindowsStarter
             // TODO: Add your update logic here
             if (pixelHitMonster())
             {
-                score -= 1;
+                if (score > 0) score -= 1;
+                pixelVelocity.X *= -1;
+                pixelVelocity.Y *= -1;
+                pixelPosition.X += 100;
+                pixelPosition.Y += 100;
                 fail.Play();
             }
 
@@ -160,6 +180,24 @@ namespace MonoGameWindowsStarter
                 changeFruitPosition();
             }
 
+
+            timer += gameTime.ElapsedGameTime;
+            // Determine the frame should increase.  Using a while 
+            // loop will accomodate the possiblity the animation should 
+            // advance more than one frame.
+            while (timer.TotalMilliseconds > ANIMATION_FRAME_RATE)
+            {
+                // increase by one frame
+                frame++;
+                // reduce the timer by one frame duration
+                timer -= new TimeSpan(0, 0, 0, 0, ANIMATION_FRAME_RATE);
+            }
+
+            // Keep the frame within bounds (there are four frames)
+            frame %= 4;
+
+            monsterSourceRect.X = frame * 50;
+
             base.Update(gameTime);
         }
 
@@ -169,13 +207,13 @@ namespace MonoGameWindowsStarter
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.White);
+            GraphicsDevice.Clear(Color.LawnGreen);
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            spriteBatch.Draw(monster, monsterRect, null, Color.White, 0.0f, new Vector2(0, 0), spriteEffects, 0.0f);
+            spriteBatch.Draw(monster, monsterRect, monsterSourceRect, Color.White, 0.0f, new Vector2(0, 0), spriteEffects, 0.0f);
             spriteBatch.Draw(fruit, fruitRect, Color.White);
-            spriteBatch.DrawString(font, "Score: " + score.ToString(), new Vector2(0, 0), Color.Purple);
+            spriteBatch.DrawString(font, "Score: " + score.ToString(), new Vector2(0, 0), Color.Black);
             spriteBatch.Draw(pixel, new Rectangle((int)pixelPosition.X, (int)pixelPosition.Y, 50, 50), Color.Red);
             spriteBatch.End();
 
