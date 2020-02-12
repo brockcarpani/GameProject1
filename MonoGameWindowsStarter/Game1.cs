@@ -32,6 +32,7 @@ namespace MonoGameWindowsStarter
         Rectangle monsterSourceRect;
         int frame;
         TimeSpan timer;
+        int lives = 3;
 
         /// <summary>
         /// How quickly the animation should advance frames (1/8 second as milliseconds)
@@ -160,13 +161,15 @@ namespace MonoGameWindowsStarter
             // TODO: Add your update logic here
             if (pixelHitMonster())
             {
-                if (score > 0) score -= 1;
+                lives -= 1;
                 pixelVelocity.X *= -1;
                 pixelVelocity.Y *= -1;
                 pixelPosition.X += 100;
                 pixelPosition.Y += 100;
                 fail.Play();
             }
+
+            if (lives <= 0) Exit();
 
             if (monsterCollectedFruit())
             {
@@ -214,6 +217,7 @@ namespace MonoGameWindowsStarter
             spriteBatch.Draw(monster, monsterRect, monsterSourceRect, Color.White, 0.0f, new Vector2(0, 0), spriteEffects, 0.0f);
             spriteBatch.Draw(fruit, fruitRect, Color.White);
             spriteBatch.DrawString(font, "Score: " + score.ToString(), new Vector2(0, 0), Color.Black);
+            spriteBatch.DrawString(font, "Lives: " + lives.ToString(), new Vector2(0, 50), Color.Black);
             spriteBatch.Draw(pixel, new Rectangle((int)pixelPosition.X, (int)pixelPosition.Y, 50, 50), Color.Red);
             spriteBatch.End();
 
